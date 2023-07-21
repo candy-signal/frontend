@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
   runApp(const MyApp());
@@ -47,6 +49,15 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
+class OAuth2WebView extends StatefulWidget {
+  final String url;
+
+  OAuth2WebView({required this.url});
+
+  @override
+  _OAuth2WebView createState() => _OAuth2WebView();
+}
+
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 
@@ -78,31 +89,15 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
+        child: ElevatedButton(
+          onPressed: () {
+            var url = googleLogin();
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => OAuth2WebView(url: url)));
+          },
+          child: const Text("googleLogin"),
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -111,5 +106,44 @@ class _MyHomePageState extends State<MyHomePage> {
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+}
+
+class _OAuth2WebView extends State<OAuth2WebView> {
+  @override
+  Widget build(BuildContext context) {
+    String url = widget.url;
+
+    return Scaffold(
+      appBar: AppBar(),
+      body: Center(
+        // Center is a layout widget. It takes a single child and positions it
+        // in the middle of the parent.
+        child: InAppWebView(
+          initialUrlRequest: URLRequest(
+            url: Uri.parse(url),
+          ),
+          initialOptions: InAppWebViewGroupOptions(
+              android: AndroidInAppWebViewOptions(useHybridComposition: true)),
+        ),
+      ),
+    );
+  }
+}
+
+googleLogin() async {
+  final url = Uri.parse("http://localhost:8080/oauth2/authorize/google");
+
+  var request = http.Request('GET', url);
+
+  http.StreamedResponse response = await request.send();
+
+  if (response.statusCode == 200) {
+    print(await response.stream.bytesToString());
+
+    String url = await response.stream.bytesToString();
+    return url;
+  } else {
+    print(response.reasonPhrase);
   }
 }
