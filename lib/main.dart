@@ -90,8 +90,9 @@ class _MyHomePageState extends State<MyHomePage> {
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
         child: ElevatedButton(
-          onPressed: () {
-            var url = googleLogin();
+          onPressed: () async {
+            var url = "http://localhost:8080/oauth2/authorize/google";
+            print(url);
             Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -139,8 +140,6 @@ googleLogin() async {
   http.StreamedResponse response = await request.send();
 
   if (response.statusCode == 200) {
-    print(await response.stream.bytesToString());
-
     String url = await response.stream.bytesToString();
     return url;
   } else {
