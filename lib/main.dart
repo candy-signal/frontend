@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_web_auth/flutter_web_auth.dart';
 
 void main() {
   runApp(const MyApp());
@@ -49,17 +51,10 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class OAuth2WebView extends StatefulWidget {
-  final String url;
-
-  OAuth2WebView({required this.url});
-
-  @override
-  _OAuth2WebView createState() => _OAuth2WebView();
-}
-
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+
+  late String _status;
 
   void _incrementCounter() {
     setState(() {
@@ -70,6 +65,45 @@ class _MyHomePageState extends State<MyHomePage> {
       // called again, and so nothing would appear to happen.
       _counter++;
     });
+  }
+
+  Future<void> signIn() async {
+    // 고유한 redirect uri
+//  const APP_REDIRECT_URI = "com.example.yjyoon";
+    // 백엔드에서 미리 작성된 API 호출
+    final url = Uri.parse('http://localhost:8080/oauth2/code/google');
+
+    print(url);
+
+    // 백엔드가 제공한 로그인 페이지에서 로그인 후 callback 데이터 반환
+
+    try {
+      final result = await FlutterWebAuth.authenticate(
+          url: url.toString(), callbackUrlScheme: "google");
+      print("callback result : " + result);
+
+      // 백엔드에서 redirect한 callback 데이터 파싱
+      final accessToken = Uri.parse(result).queryParameters['access-token'];
+      final refreshToken = Uri.parse(result).queryParameters['refresh-token'];
+
+      print(accessToken);
+      print(refreshToken);
+
+      setState(() {
+        _status = 'Got result: $result';
+      });
+      print(_status);
+    } catch (e) {
+      setState(() {
+        _status = 'Got error: $e';
+      });
+      print(_status);
+    }
+
+    // . . .
+    // FlutterSecureStorage 또는 SharedPreferences 를 통한
+    // Token 저장 및 관리
+    // . . .
   }
 
   @override
@@ -91,12 +125,13 @@ class _MyHomePageState extends State<MyHomePage> {
         // in the middle of the parent.
         child: ElevatedButton(
           onPressed: () async {
-            var url = "http://localhost:8080/oauth2/authorize/google";
-            print(url);
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => OAuth2WebView(url: url)));
+            // var url = "http://localhost:8080/oauth2/authorize/google";
+            // print(url);
+            // Navigator.push(
+            //     context,
+            //     MaterialPageRoute(
+            //         builder: (context) => OAuth2WebView(url: url)));
+            signIn();
           },
           child: const Text("googleLogin"),
         ),
@@ -107,42 +142,5 @@ class _MyHomePageState extends State<MyHomePage> {
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
-  }
-}
-
-class _OAuth2WebView extends State<OAuth2WebView> {
-  @override
-  Widget build(BuildContext context) {
-    String url = widget.url;
-
-    return Scaffold(
-      appBar: AppBar(),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: InAppWebView(
-          initialUrlRequest: URLRequest(
-            url: Uri.parse(url),
-          ),
-          initialOptions: InAppWebViewGroupOptions(
-              android: AndroidInAppWebViewOptions(useHybridComposition: true)),
-        ),
-      ),
-    );
-  }
-}
-
-googleLogin() async {
-  final url = Uri.parse("http://localhost:8080/oauth2/authorize/google");
-
-  var request = http.Request('GET', url);
-
-  http.StreamedResponse response = await request.send();
-
-  if (response.statusCode == 200) {
-    String url = await response.stream.bytesToString();
-    return url;
-  } else {
-    print(response.reasonPhrase);
   }
 }
