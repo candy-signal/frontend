@@ -67,11 +67,11 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  Future<void> signIn() async {
+  Future<void> signIn(provider) async {
     // final url = Uri.parse('http://localhost:8080/oauth2/authorize/google');
     // final url =
     //     Uri.parse('http://localhost:8080/oauth2/authorize/$APP_REDIRECT_URI');
-    final url = Uri.parse('http://localhost:8080/oauth2/authorize/google');
+    final url = Uri.parse('http://localhost:8080/oauth2/authorize/$provider');
 
     print(url.toString());
 
@@ -120,21 +120,31 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: ElevatedButton(
-          onPressed: () async {
-            // var url = "http://localhost:8080/oauth2/authorize/google";
-            // print(url);
-            // Navigator.push(
-            //     context,
-            //     MaterialPageRoute(
-            //         builder: (context) => OAuth2WebView(url: url)));
-            signIn();
-          },
-          child: const Text("googleLogin"),
-        ),
-      ),
+          // Center is a layout widget. It takes a single child and positions it
+          // in the middle of the parent.
+          child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ElevatedButton(
+            onPressed: () async {
+              signIn("google");
+            },
+            child: const Text("GoogleLogin"),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              signIn("kakao");
+            },
+            child: const Text("KaKaoLogin"),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              signIn("naver");
+            },
+            child: const Text("NaverLogin"),
+          ),
+        ],
+      )),
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
         tooltip: 'Increment',
