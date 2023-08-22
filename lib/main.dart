@@ -68,26 +68,25 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> signIn() async {
-    // 고유한 redirect uri
-//  const APP_REDIRECT_URI = "com.example.yjyoon";
-    // 백엔드에서 미리 작성된 API 호출
-    final url = Uri.parse('http://localhost:8080/oauth2/code/google');
+    // final url = Uri.parse('http://localhost:8080/oauth2/authorize/google');
+    // final url =
+    //     Uri.parse('http://localhost:8080/oauth2/authorize/$APP_REDIRECT_URI');
+    final url = Uri.parse('http://localhost:8080/oauth2/authorize/google');
 
-    print(url);
-
-    // 백엔드가 제공한 로그인 페이지에서 로그인 후 callback 데이터 반환
+    print(url.toString());
 
     try {
       final result = await FlutterWebAuth.authenticate(
-          url: url.toString(), callbackUrlScheme: "google");
+          url: url.toString(), callbackUrlScheme: "candysignal");
+
       print("callback result : " + result);
 
-      // 백엔드에서 redirect한 callback 데이터 파싱
-      final accessToken = Uri.parse(result).queryParameters['access-token'];
-      final refreshToken = Uri.parse(result).queryParameters['refresh-token'];
+      // // 백엔드에서 redirect한 callback 데이터 파싱
+      // final accessToken = Uri.parse(result).queryParameters['access-token'];
+      // final refreshToken = Uri.parse(result).queryParameters['refresh-token'];
 
-      print(accessToken);
-      print(refreshToken);
+      // print(accessToken);
+      // print(refreshToken);
 
       setState(() {
         _status = 'Got result: $result';
