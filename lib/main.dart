@@ -65,7 +65,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // final url = Uri.parse('http://localhost:8080/oauth2/authorize/google');
     // final url =
     //     Uri.parse('http://localhost:8080/oauth2/authorize/$APP_REDIRECT_URI');
-    final url = Uri.parse('http://localhost:8080/oauth2/authorize/$provider');
+    final url = Uri.parse('http://localhost:62361/oauth2/authorize/$provider');
 
     print(url.toString());
 
